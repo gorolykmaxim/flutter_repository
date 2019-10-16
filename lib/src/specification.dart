@@ -6,6 +6,10 @@ enum ConditionType {
   equals, lessThan, greaterThan, contains, containsIgnoreCase, and, or
 }
 
+/// A [Condition] that an entity, stored in a [Collection], may match.
+///
+/// Used by [Specification] to select sets of entities stored in [Collection],
+/// which match all of [Specification]'s [Condition]s.
 class Condition {
 
   /// Name of entity's field, that should be checked by this [Condition].
