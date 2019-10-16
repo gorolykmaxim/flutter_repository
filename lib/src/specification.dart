@@ -25,19 +25,19 @@ class Condition {
   /// Only [ConditionType.or] and [ConditionType.and] [Condition]s can have
   /// child [Condition]s. Conditions with other [type] will have [children]
   /// as an empty list.
-  final Iterable<Condition> children;
+  Iterable<Condition> children = [];
 
   /// Creates a [Condition], that will check if value of entity's [field] is
   /// equal to [value].
-  Condition.equals(this.field, this.value): children = [], type = ConditionType.equals;
+  Condition.equals(this.field, this.value): type = ConditionType.equals;
 
   /// Creates a [Condition], that will check if value of entity's [field] is
   /// less than [value].
-  Condition.lessThan(this.field, this.value): children = [], type = ConditionType.lessThan;
+  Condition.lessThan(this.field, this.value): type = ConditionType.lessThan;
 
   /// Creates a [Condition], that will check if value of entity's [field] is
   /// greater than [value].
-  Condition.greaterThan(this.field, this.value): children = [], type = ConditionType.greaterThan;
+  Condition.greaterThan(this.field, this.value): type = ConditionType.greaterThan;
 
   /// Creates a [Condition], that will check if value of entity's [field]
   /// contains [value].
@@ -45,7 +45,7 @@ class Condition {
   /// If [ignoreCase] is set to true, then [String]-based checks will be
   /// conducted without considering characters' register. By default
   /// [ignoreCase] is set to false.
-  Condition.contains(this.field, this.value, {ignoreCase = false}): children = [], type = ignoreCase ? ConditionType.containsIgnoreCase : ConditionType.contains;
+  Condition.contains(this.field, this.value, {ignoreCase = false}): type = ignoreCase ? ConditionType.containsIgnoreCase : ConditionType.contains;
 
   /// Creates a [Condition], which will match an entity only if all of
   /// [children] will match that entity.
