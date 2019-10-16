@@ -1,7 +1,3 @@
-library flutter_repository;
-
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'src/collection.dart';
+export 'src/data.dart';
+export 'src/specification.dart';
