@@ -92,6 +92,20 @@ class Condition {
 class Specification {
   List<Condition> _conditions = [];
 
+  /// Maximum amount of entities that can be returned using this [Specification].
+  ///
+  /// If the value is not set explicitly here, then an actual [DataSource]
+  /// implementation, used by queried [Collection] decides it.
+  int limit;
+
+  /// Offset to be taken for entities, returned using this [Specification].
+  ///
+  /// Measured in actual entities rather than in pages of entities.
+  ///
+  /// If the value is not set explicitly here, then an actual [DataSource]
+  /// implementation, used by queried [Collection] decides it.
+  int offset;
+
   /// Returns all [Condition]s, of this [Specification].
   List<Condition> get conditions => List<Condition>.from(_conditions);
 
@@ -134,8 +148,13 @@ class Specification {
       identical(this, other) ||
           other is Specification &&
               runtimeType == other.runtimeType &&
-              iterableComparator.equals(_conditions, other._conditions);
+              iterableComparator.equals(_conditions, other._conditions) &&
+              limit == other.limit &&
+              offset == other.offset;
 
   @override
-  int get hashCode => _conditions.hashCode;
+  int get hashCode =>
+      _conditions.hashCode ^
+      limit.hashCode ^
+      offset.hashCode;
 }

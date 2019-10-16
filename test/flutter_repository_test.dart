@@ -18,6 +18,8 @@ void main() {
       specification.greaterThan("field3", -5);
       specification.contains("field4", "word");
       specification.contains("field5", "WoRD", ignoreCase: true);
+      specification.limit = 100;
+      specification.offset = 200;
       expect(specification.conditions, [
         Condition.equals("field1", 15),
         Condition.lessThan("field2", 32.2),
@@ -25,6 +27,12 @@ void main() {
         Condition.contains("field4", "word", ignoreCase: false),
         Condition.contains("field5", "WoRD", ignoreCase: true)
       ]);
+      expect(specification.limit, 100);
+      expect(specification.offset, 200);
+    });
+    test('creates specification that should have limit and offset set ot null by default', () {
+      expect(specification.limit, isNull);
+      expect(specification.offset, isNull);
     });
     test('creates specification with "or" condition, that has two "and" conditions in it', () {
       Condition and1 = Condition.and([]);
