@@ -1,8 +1,8 @@
 name: flutter_repository
 description: A new Flutter package.
 version: 1.0.0-dev.1
-author:
-homepage:
+author: Horoliuk Maksym <goroliuk.maksym@gmail.com>
+homepage: https://github.com/gorolykmaxim/flutter_repository
 
 environment:
   sdk: ">=2.1.0 <3.0.0"
