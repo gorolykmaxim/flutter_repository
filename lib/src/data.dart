@@ -32,15 +32,19 @@ class EntityContext {
       idFieldNames.hashCode;
 }
 
-/// Abstract [DataSource] that contains data and allows it's modification.
-///
-/// [DataSource] can be anything: database, third-party HTTP API, file system
-/// etc.
-abstract class DataSource {
+/// Abstract read-only [DataSource] that only allows querying it's data.
+abstract class ReadonlyDataSource {
 
   /// Find collection of entities, stored in [DataSource], that match the
   /// [specification].
   Future<List<Map<String, dynamic>>> find(Specification specification);
+}
+
+/// Abstract [DataSource] that contains data and allows it's modification.
+///
+/// [DataSource] can be anything: database, third-party HTTP API, file system
+/// etc.
+abstract class DataSource extends ReadonlyDataSource {
 
   /// Saves specified [entityContexts] in [DataSource], that were not previously
   /// present there.

@@ -52,17 +52,12 @@ class ModificationException extends CollectionException {
 }
 
 /// A base class for a [Collection] and [ImmutableCollection].
-///
-/// All inheritors of this class use some sort of [DataSource] implementation
-/// to store entities in.
-abstract class BaseCollection<T> {
-  final DataSource _dataSource;
+abstract class _BaseCollection<T> {
   final DataSourceServant _servant;
 
-  /// Create a [Collection] that relies on the [_dataSource] to store it's
-  /// entities in and uses [_servant] to serialize and deserialize those
-  /// entities.
-  BaseCollection(this._dataSource, this._servant);
+  /// Create a [Collection] that uses [_servant] to serialize and deserialize
+  /// entities, stored in it.
+  _BaseCollection(this._servant);
 }
 
 /// A [Collection] that can't be modified.
@@ -70,11 +65,12 @@ abstract class BaseCollection<T> {
 /// The [ImmutableCollection] is a good abstraction for data sources,
 /// that are used in an application only as a sources of data and for various
 /// reasons can't be modified.
-class ImmutableCollection<T> extends BaseCollection<T> {
+class ImmutableCollection<T> extends _BaseCollection<T> {
+  final ReadonlyDataSource _dataSource;
 
   /// Create an [ImmutableCollection] that will query entities from [dataSource]
   /// and deserialize them using [servant].
-  ImmutableCollection(DataSource dataSource, DataSourceServant servant) : super(dataSource, servant);
+  ImmutableCollection(this._dataSource, DataSourceServant servant) : super(servant);
 
   /// Find all entities in this [ImmutableCollection], that match the
   /// [specification].
@@ -123,10 +119,11 @@ class ImmutableCollection<T> extends BaseCollection<T> {
 /// [Collection] you would have to explicitly propagate that change
 /// to the [Collection] using [update].
 class Collection<T> extends ImmutableCollection<T> {
+  final DataSource _dataSource;
 
   /// Create a [Collection], that will store entities in the [dataSource]
   /// and serialize/deserialize them using [servant].
-  Collection(DataSource dataSource, DataSourceServant servant) : super(dataSource, servant);
+  Collection(this._dataSource, DataSourceServant servant) : super(_dataSource, servant);
 
   /// Add [entity] to the [Collection].
   Future<void> add(T entity) async {
