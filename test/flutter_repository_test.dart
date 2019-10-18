@@ -20,6 +20,8 @@ void main() {
       specification.contains("field5", "WoRD", ignoreCase: true);
       specification.limit = 100;
       specification.offset = 200;
+      specification.appendOrderDefinition(Order.ascending("field1"));
+      specification.appendOrderDefinition(Order.descending("field2"));
       expect(specification.conditions, [
         Condition.equals("field1", 15),
         Condition.lessThan("field2", 32.2),
@@ -29,6 +31,7 @@ void main() {
       ]);
       expect(specification.limit, 100);
       expect(specification.offset, 200);
+      expect(specification.orderDefinitions, [Order.ascending("field1"), Order.descending("field2")]);
     });
     test('creates specification that should have limit and offset set ot null by default', () {
       expect(specification.limit, isNull);

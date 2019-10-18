@@ -77,6 +77,39 @@ class Condition {
       children.hashCode;
 }
 
+enum OrderType {
+  asc, desc
+}
+
+/// [Order] definition for results, returned by [Specification].
+class Order {
+
+  /// Name of a field, by which results should be ordered.
+  final String field;
+
+  /// Type of the ordering that should be applied.
+  final OrderType type;
+
+  /// Order [Specification] results by [field] in ascending order.
+  Order.ascending(this.field): type = OrderType.asc;
+
+  /// Order [Specification] results by [field] in descending order.
+  Order.descending(this.field): type = OrderType.desc;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Order &&
+              runtimeType == other.runtimeType &&
+              field == other.field &&
+              type == other.type;
+
+  @override
+  int get hashCode =>
+      field.hashCode ^
+      type.hashCode;
+}
+
 /// A [Specification], that describes a set of entities in a [Collection] or
 /// [ImmutableCollection].
 ///
@@ -91,6 +124,7 @@ class Condition {
 /// statement.
 class Specification {
   List<Condition> _conditions = [];
+  List<Order> _orderDefinitions = [];
 
   /// Maximum amount of entities that can be returned using this [Specification].
   ///
@@ -108,6 +142,13 @@ class Specification {
 
   /// Returns all [Condition]s, of this [Specification].
   List<Condition> get conditions => List<Condition>.from(_conditions);
+
+  /// Returns definition of [Order] in which results of this [Specification]
+  /// should be ordered.
+  ///
+  /// Single specification can have multiple [Order] definitions and all of them
+  /// are stored in a particular order (no pun intended).
+  List<Order> get orderDefinitions => List<Order>.from(_orderDefinitions);
 
   /// Adds an equality [Condition] to this [Specification].
   ///
@@ -142,6 +183,13 @@ class Specification {
 
   /// Adds specified [Condition] to this [Specification].
   void add(Condition condition) => _conditions.add(condition);
+
+  /// Defines the [order] in which results, matching this [Specification],
+  /// should be returned.
+  ///
+  /// Single [Specification] can have multiple [Order] definitions in case
+  /// there is a need to order results by multiple fields.
+  void appendOrderDefinition(Order order) => _orderDefinitions.add(order);
 
   @override
   bool operator ==(Object other) =>
