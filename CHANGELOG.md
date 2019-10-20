@@ -1,3 +1,7 @@
+## [1.0.0-dev.4]
+Fix DataSourceServant type definition in _BaseCollection, 
+ImmutableCollection and Collection.
+
 ## [1.0.0-dev.3]
 Added ordering support for results of Specification.
 

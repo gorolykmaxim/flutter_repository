@@ -53,7 +53,7 @@ class ModificationException extends CollectionException {
 
 /// A base class for a [Collection] and [ImmutableCollection].
 abstract class _BaseCollection<T> {
-  final DataSourceServant _servant;
+  final DataSourceServant<T> _servant;
 
   /// Create a [Collection] that uses [_servant] to serialize and deserialize
   /// entities, stored in it.
@@ -70,7 +70,7 @@ class ImmutableCollection<T> extends _BaseCollection<T> {
 
   /// Create an [ImmutableCollection] that will query entities from [dataSource]
   /// and deserialize them using [servant].
-  ImmutableCollection(this._dataSource, DataSourceServant servant) : super(servant);
+  ImmutableCollection(this._dataSource, DataSourceServant<T> servant) : super(servant);
 
   /// Find all entities in this [ImmutableCollection], that match the
   /// [specification].
@@ -123,7 +123,7 @@ class Collection<T> extends ImmutableCollection<T> {
 
   /// Create a [Collection], that will store entities in the [dataSource]
   /// and serialize/deserialize them using [servant].
-  Collection(this._dataSource, DataSourceServant servant) : super(_dataSource, servant);
+  Collection(this._dataSource, DataSourceServant<T> servant) : super(_dataSource, servant);
 
   /// Add [entity] to the [Collection].
   Future<void> add(T entity) async {
