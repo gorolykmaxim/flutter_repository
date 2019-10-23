@@ -93,7 +93,7 @@ abstract class Collection<T> extends ImmutableCollection<T> {
   ///
   /// [addAll] is expected to be more efficient for adding multiple entities
   /// to the [Collection] than calling [add] multiple times in a loop.
-  Future<void> addAll(Iterable<T> entity);
+  Future<void> addAll(Iterable<T> entities);
 
   /// Update [entity], that is already present in the [Collection].
   Future<void> update(T entity);
