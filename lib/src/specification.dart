@@ -191,6 +191,22 @@ class Specification {
   /// there is a need to order results by multiple fields.
   void appendOrderDefinition(Order order) => _orderDefinitions.add(order);
 
+  /// Add [Condition]s from the [specification] to this [Specification].
+  ///
+  /// If a [Condition] of this [Specification] references a field name,
+  /// that is present in ones of [specification] [Condition]s, it will be
+  /// overridden.
+  void insertConditionsFrom(Specification specification) {
+    final theirConditionFields = specification.conditions
+        .where((c) => c.children.isEmpty)
+        .map((c) => c.field)
+        .toSet();
+    _conditions = _conditions
+        .where((c) => !theirConditionFields.contains(c.field))
+        .toList();
+    _conditions.addAll(specification.conditions);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

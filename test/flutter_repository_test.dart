@@ -44,6 +44,31 @@ void main() {
       specification.add(or);
       expect(specification.conditions, [or]);
     });
+    test('replaces current conditions of the specification with the ones from the specified one', () {
+      specification.equals("name", 'Tom');
+      specification.equals('city', 'New York');
+      specification.equals('phone', '829344');
+      specification.equals('age', 15);
+      specification.greaterThan('income', 352);
+      specification.add(Condition.or([Condition.equals('family', true), Condition.equals('ownFamily', true)]));
+      specification.limit = 15;
+      specification.offset = 0;
+      final other = Specification();
+      other.equals('name', 'Frank');
+      other.equals('city', 'Los Angeles');
+      other.equals('phone', '354263');
+      specification.insertConditionsFrom(other);
+      expect(specification.conditions, [
+        Condition.equals('age', 15),
+        Condition.greaterThan('income', 352),
+        Condition.or([Condition.equals('family', true), Condition.equals('ownFamily', true)]),
+        Condition.equals('name', 'Frank'),
+        Condition.equals('city', 'Los Angeles'),
+        Condition.equals('phone', '354263')
+      ]);
+      expect(specification.limit, 15);
+      expect(specification.offset, 0);
+    });
   });
   group('Collection', () {
     final specification = Specification();
