@@ -86,7 +86,7 @@ void main() {
         when(servant.serialize(expectedObjects[i])).thenReturn(persistentObjects[i]);
         when(servant.idFieldNames).thenReturn(["field1"]);
       }
-      objects = Collection(dataSource, servant);
+      objects = SimpleCollection(dataSource, servant);
     });
     test('finds all entities matching the pattern', () async {
       expect(await objects.findAll(specification), expectedObjects);

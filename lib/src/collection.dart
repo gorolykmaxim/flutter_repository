@@ -51,29 +51,81 @@ class ModificationException extends CollectionException {
   ModificationException.specification(String action, Specification specification, this.cause): super('Failed to $action entities using $specification. Reason: $cause');
 }
 
-/// A base class for a [Collection] and [ImmutableCollection].
-abstract class _BaseCollection<T> {
-  final DataSourceServant<T> _servant;
-
-  /// Create a [Collection] that uses [_servant] to serialize and deserialize
-  /// entities, stored in it.
-  _BaseCollection(this._servant);
-}
-
 /// A [Collection] that can't be modified.
 ///
 /// The [ImmutableCollection] is a good abstraction for data sources,
 /// that are used in an application only as a sources of data and for various
 /// reasons can't be modified.
-class ImmutableCollection<T> extends _BaseCollection<T> {
-  final ReadonlyDataSource _dataSource;
-
-  /// Create an [ImmutableCollection] that will query entities from [dataSource]
-  /// and deserialize them using [servant].
-  ImmutableCollection(this._dataSource, DataSourceServant<T> servant) : super(servant);
+abstract class ImmutableCollection<T> {
 
   /// Find all entities in this [ImmutableCollection], that match the
   /// [specification].
+  Future<List<T>> findAll(Specification specification);
+
+  /// Find only one entity in this [ImmutableCollection] using the
+  /// [specification].
+  ///
+  /// If the [ImmutableCollection] can't return precisely one entity
+  /// (e.g. there is either 0 or more than 1 entities like it) -
+  /// [UnexpectedCollectionSizeException] will be thrown.
+  Future<T> findOne(Specification specification);
+
+  /// Find entities in this [ImmutableCollection] that match the [specification]
+  /// and return only the first one of them.
+  ///
+  /// If [ImmutableCollection] contains no such entities - [ImmutableCollection]
+  /// will throw [UnexpectedCollectionSizeException].
+  Future<T> findFirst(Specification specification);
+}
+
+/// A [Collection] of entities, that stores copies of those entities.
+///
+/// The fact that the [Collection] stores copies instead of actual objects
+/// means that each you want to update an object, that is stored in the
+/// [Collection] you would have to explicitly propagate that change
+/// to the [Collection] using [update].
+abstract class Collection<T> extends ImmutableCollection<T> {
+
+  /// Add [entity] to the [Collection].
+  Future<void> add(T entity);
+
+  /// Add all [entities] to the [Collection].
+  ///
+  /// [addAll] is expected to be more efficient for adding multiple entities
+  /// to the [Collection] than calling [add] multiple times in a loop.
+  Future<void> addAll(Iterable<T> entity);
+
+  /// Update [entity], that is already present in the [Collection].
+  Future<void> update(T entity);
+
+  /// Remove [entity] from the [Collection].
+  Future<void> removeOne(T entity);
+
+  /// Remove all [entities] from the [Collection].
+  ///
+  /// [removeAll] is expected to be more efficient for removing multiple
+  /// entities from the [Collection] than calling [removeOne] multiple times
+  /// in a loop.
+  Future<void> removeAll(Iterable<T> entities);
+
+  /// Remove all entities from the [Collection] that match the [specification].
+  ///
+  /// Expected to be as effective for removal of multiple entities as a
+  /// [removeAll].
+  Future<void> remove(Specification specification);
+}
+
+/// Default implementation of [ImmutableCollection], that works with
+/// [DataSource] and [DataSourceServant].
+class SimpleImmutableCollection<T> implements ImmutableCollection<T> {
+  ReadonlyDataSource _dataSource;
+  DataSourceServant<T> _servant;
+
+  /// Create an [SimpleImmutableCollection] that will query entities from
+  /// [dataSource] and deserialize them using [servant].
+  SimpleImmutableCollection(this._dataSource, this._servant);
+
+  @override
   Future<List<T>> findAll(Specification specification) async {
     try {
       List<Map<String, dynamic>> entities = await _dataSource.find(specification);
@@ -83,12 +135,7 @@ class ImmutableCollection<T> extends _BaseCollection<T> {
     }
   }
 
-  /// Find only one entity in this [ImmutableCollection] using the
-  /// [specification].
-  ///
-  /// If the [ImmutableCollection] can't return precisely one entity
-  /// (e.g. there is either 0 or more than 1 entities like it) -
-  /// [UnexpectedCollectionSizeException] will be thrown.
+  @override
   Future<T> findOne(Specification specification) async {
     List<T> entities = await findAll(specification);
     num entitiesFound = entities.length;
@@ -98,11 +145,7 @@ class ImmutableCollection<T> extends _BaseCollection<T> {
     return entities[0];
   }
 
-  /// Find entities in this [ImmutableCollection] that match the [specification]
-  /// and return only the first one of them.
-  ///
-  /// If [ImmutableCollection] contains no such entities - [ImmutableCollection]
-  /// will throw [UnexpectedCollectionSizeException].
+  @override
   Future<T> findFirst(Specification specification) async {
     List<T> entities = await findAll(specification);
     if (entities.isEmpty) {
@@ -112,20 +155,22 @@ class ImmutableCollection<T> extends _BaseCollection<T> {
   }
 }
 
-/// A [Collection] of entities, that stores copies of those entities.
-///
-/// The fact that the [Collection] stores copies instead of actual objects
-/// means that each you want to update an object, that is stored in the
-/// [Collection] you would have to explicitly propagate that change
-/// to the [Collection] using [update].
-class Collection<T> extends ImmutableCollection<T> {
-  final DataSource _dataSource;
+/// Default implementation of [Collection], that works with [DataSource] and
+/// [DataSourceServant].
+class SimpleCollection<T> implements Collection<T> {
+  ImmutableCollection<T> _queryableCollection;
+  DataSource _dataSource;
+  DataSourceServant<T> _servant;
 
-  /// Create a [Collection], that will store entities in the [dataSource]
+  /// Create a [SimpleCollection], that will store entities in the [dataSource]
   /// and serialize/deserialize them using [servant].
-  Collection(this._dataSource, DataSourceServant<T> servant) : super(_dataSource, servant);
+  /// [queryableCollection] can be specified, that will be used to lookup
+  /// entities.
+  SimpleCollection(this._dataSource, this._servant, [ImmutableCollection<T> queryableCollection]) {
+    _queryableCollection = queryableCollection ?? SimpleImmutableCollection(_dataSource, _servant);
+  }
 
-  /// Add [entity] to the [Collection].
+  @override
   Future<void> add(T entity) async {
     try {
       await _dataSource.create([_createEntityContext(entity)]);
@@ -134,10 +179,7 @@ class Collection<T> extends ImmutableCollection<T> {
     }
   }
 
-  /// Add all [entities] to the [Collection].
-  ///
-  /// [addAll] is expected to be more efficient for adding multiple entities
-  /// to the [Collection] than calling [add] multiple times in a loop.
+  @override
   Future<void> addAll(Iterable<T> entities) async {
     try {
       await _dataSource.create(entities.map(_createEntityContext));
@@ -146,7 +188,7 @@ class Collection<T> extends ImmutableCollection<T> {
     }
   }
 
-  /// Update [entity], that is already present in the [Collection].
+  @override
   Future<void> update(T entity) async {
     try {
       await _dataSource.update(_createEntityContext(entity));
@@ -155,7 +197,7 @@ class Collection<T> extends ImmutableCollection<T> {
     }
   }
 
-  /// Remove [entity] from the [Collection].
+  @override
   Future<void> removeOne(T entity) async {
     try {
       await _dataSource.remove([_createEntityContext(entity)]);
@@ -164,11 +206,7 @@ class Collection<T> extends ImmutableCollection<T> {
     }
   }
 
-  /// Remove all [entities] from the [Collection].
-  ///
-  /// [removeAll] is expected to be more efficient for removing multiple
-  /// entities from the [Collection] than calling [removeOne] multiple times
-  /// in a loop.
+  @override
   Future<void> removeAll(Iterable<T> entities) async {
     try {
       await _dataSource.remove(entities.map(_createEntityContext));
@@ -177,10 +215,7 @@ class Collection<T> extends ImmutableCollection<T> {
     }
   }
 
-  /// Remove all entities from the [Collection] that match the [specification].
-  ///
-  /// Expected to be as effective for removal of multiple entities as a
-  /// [removeAll].
+  @override
   Future<void> remove(Specification specification) async {
     try {
       await _dataSource.removeMatching(specification);
@@ -192,4 +227,13 @@ class Collection<T> extends ImmutableCollection<T> {
   EntityContext _createEntityContext(T entity) {
     return EntityContext(_servant.serialize(entity), _servant.idFieldNames);
   }
+
+  @override
+  Future<List<T>> findAll(Specification specification) => _queryableCollection.findAll(specification);
+
+  @override
+  Future<T> findFirst(Specification specification) => _queryableCollection.findFirst(specification);
+
+  @override
+  Future<T> findOne(Specification specification) => _queryableCollection.findOne(specification);
 }
