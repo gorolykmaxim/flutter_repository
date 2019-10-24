@@ -175,7 +175,7 @@ class SimpleCollectionTest extends Test {
     });
     declareTest('removes all entities from the collection, that match a specification', () async {
       await objects.remove(specification);
-      verify(dataSource.removeMatching(specification));
+      verify(dataSource.removeMatching(specification)).called(1);
     });
     declareTest('fails to remove entities, matching the specification, due to some exception', () async {
       when(dataSource.removeMatching(any)).thenAnswer((_) => Future.error(MockException()));
