@@ -237,3 +237,52 @@ class SimpleCollection<T> implements Collection<T> {
   @override
   Future<T> findOne(Specification specification) => _queryableCollection.findOne(specification);
 }
+
+/// [ImmutableCollection] that will only provide access to entities, that
+/// belong to a specific entity instance.
+///
+/// For example if user has [Collection] of private items,
+/// [PrivateImmutableCollection] will only provide access to items, that
+/// belong to that specific user.
+class PrivateImmutableCollection<T> extends SimpleImmutableCollection<T> {
+  Specification _owner;
+
+  /// Create [PrivateImmutableCollection], that will query entities from
+  /// [dataSource] and deserialize them using [servant].
+  /// [PrivateImmutableCollection] will only query entities that belong to
+  /// an entity, described by [_owner] [Specification].
+  PrivateImmutableCollection(this._owner, DataSource dataSource, DataSourceServant<T> servant): super(dataSource, servant);
+
+  @override
+  Future<List<T>> findAll(Specification specification) {
+    specification.insertConditionsFrom(_owner);
+    return super.findAll(specification);
+  }
+}
+
+/// [Collection] that will only provide access to entities, that belong
+/// to a specific entity instance.
+///
+/// For example if user has [Collection] of private items,
+/// [PrivateImmutableCollection] will only provide access to items, that
+/// belong to that specific user.
+///
+/// Note, that methods of [PrivateCollection], to which you pass actual entity
+/// instances instead of [Specification], will treat passed entities as ones
+/// that belong to the owner of the collection.
+class PrivateCollection<T> extends SimpleCollection<T> {
+  ImmutableCollection<T> _queryableCollection;
+  Specification _owner;
+
+  /// Create [PrivateCollection], that will store entities in [dataSource] and
+  /// serializes/deserializes them using [servant].
+  /// [PrivateCollection] will only store entities, that belong to
+  /// an entity, describe by [_owner] [Specification].
+  PrivateCollection(this._owner, DataSource dataSource, DataSourceServant<T> servant): super(dataSource, servant, PrivateImmutableCollection(_owner, dataSource, servant));
+
+  @override
+  Future<void> remove(Specification specification) async {
+    specification.insertConditionsFrom(_owner);
+    await super.remove(specification);
+  }
+}

@@ -1,3 +1,6 @@
+## [1.0.0-dev.5]
+Introduce PrivateCollection amd PrivateImmutableCollection.
+
 ## [1.0.0-dev.4]
 Fix DataSourceServant type definition in _BaseCollection, 
 ImmutableCollection and Collection.

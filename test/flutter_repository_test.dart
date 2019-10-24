@@ -87,7 +87,7 @@ class SimpleCollectionTest extends Test {
   final expectedObjects = [Object(), Object(), Object()];
   final persistentObjects = [{"field1": 15}, {"field1": 32}, {"field1": -5}];
 
-  SimpleCollectionTest(): super('SimpleCollectionTest');
+  SimpleCollectionTest({name = 'SimpleCollectionTest'}): super(name);
 
   @override
   void setUp() {
@@ -184,7 +184,36 @@ class SimpleCollectionTest extends Test {
   }
 }
 
+class PrivateCollectionTest extends SimpleCollectionTest {
+  Specification ownerSpecification;
+
+  PrivateCollectionTest({name: 'PrivateCollectionTest'}): super(name: name);
+
+  @override
+  void setUp() {
+    super.setUp();
+    ownerSpecification = Specification();
+    ownerSpecification.equals('userId', 12345);
+    when(dataSource.find(ownerSpecification)).thenAnswer((_) => Future.value(persistentObjects));
+    objects = PrivateCollection(ownerSpecification, dataSource, servant);
+  }
+
+  @override
+  void declareTests() {
+    super.declareTests();
+    declareTest('removes all entities from the collection, that match a specification', () async {
+      await objects.remove(specification);
+      verify(dataSource.removeMatching(ownerSpecification)).called(1);
+    });
+    declareTest('fails to remove entities, matching the specification, due to some exception', () async {
+      when(dataSource.removeMatching(any)).thenAnswer((_) => Future.error(MockException()));
+      expect(objects.remove(ownerSpecification), throwsA(isInstanceOf<ModificationException>()));
+    });
+  }
+}
+
 void main() {
   SpecificationTest().run();
   SimpleCollectionTest().run();
+  PrivateCollectionTest().run();
 }
