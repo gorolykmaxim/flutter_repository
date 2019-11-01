@@ -1,3 +1,7 @@
+## [1.0.0-dev.6]
+Made PrivateImmutableCollection and PrivateCollection proxies to actual
+ImmutableCollection and Collection implementations.
+
 ## [1.0.0-dev.5]
 Introduce PrivateCollection amd PrivateImmutableCollection.
 

@@ -244,19 +244,33 @@ class SimpleCollection<T> implements Collection<T> {
 /// For example if user has [Collection] of private items,
 /// [PrivateImmutableCollection] will only provide access to items, that
 /// belong to that specific user.
-class PrivateImmutableCollection<T> extends SimpleImmutableCollection<T> {
+class PrivateImmutableCollection<T> implements ImmutableCollection<T> {
   Specification _owner;
+  ImmutableCollection<T> _immutableCollection;
 
   /// Create [PrivateImmutableCollection], that will query entities from
-  /// [dataSource] and deserialize them using [servant].
+  /// [_immutableCollection].
+  ///
   /// [PrivateImmutableCollection] will only query entities that belong to
   /// an entity, described by [_owner] [Specification].
-  PrivateImmutableCollection(this._owner, DataSource dataSource, DataSourceServant<T> servant): super(dataSource, servant);
+  PrivateImmutableCollection(this._owner, this._immutableCollection);
 
   @override
   Future<List<T>> findAll(Specification specification) {
     specification.insertConditionsFrom(_owner);
-    return super.findAll(specification);
+    return _immutableCollection.findAll(specification);
+  }
+
+  @override
+  Future<T> findFirst(Specification specification) {
+    specification.insertConditionsFrom(_owner);
+    return _immutableCollection.findFirst(specification);
+  }
+
+  @override
+  Future<T> findOne(Specification specification) {
+    specification.insertConditionsFrom(_owner);
+    return _immutableCollection.findOne(specification);
   }
 }
 
@@ -270,19 +284,62 @@ class PrivateImmutableCollection<T> extends SimpleImmutableCollection<T> {
 /// Note, that methods of [PrivateCollection], to which you pass actual entity
 /// instances instead of [Specification], will treat passed entities as ones
 /// that belong to the owner of the collection.
-class PrivateCollection<T> extends SimpleCollection<T> {
-  ImmutableCollection<T> _queryableCollection;
+class PrivateCollection<T> implements Collection<T> {
   Specification _owner;
+  Collection<T> _collection;
+  ImmutableCollection _immutableCollection;
 
-  /// Create [PrivateCollection], that will store entities in [dataSource] and
-  /// serializes/deserializes them using [servant].
+  /// Create [PrivateCollection], that will store entities in [_collection].
+  ///
   /// [PrivateCollection] will only store entities, that belong to
-  /// an entity, describe by [_owner] [Specification].
-  PrivateCollection(this._owner, DataSource dataSource, DataSourceServant<T> servant): super(dataSource, servant, PrivateImmutableCollection(_owner, dataSource, servant));
+  /// an entity, described by [_owner] [Specification].
+  PrivateCollection(this._owner, this._collection) {
+    _immutableCollection = PrivateImmutableCollection(_owner, _collection);
+  }
 
   @override
-  Future<void> remove(Specification specification) async {
+  Future<void> remove(Specification specification) {
     specification.insertConditionsFrom(_owner);
-    await super.remove(specification);
+    return _collection.remove(specification);
+  }
+
+  @override
+  Future<void> add(T entity) {
+    return _collection.add(entity);
+  }
+
+  @override
+  Future<void> addAll(Iterable<T> entities) {
+    return _collection.addAll(entities);
+  }
+
+  @override
+  Future<List<T>> findAll(Specification specification) {
+    return _immutableCollection.findAll(specification);
+  }
+
+  @override
+  Future<T> findFirst(Specification specification) {
+    return _immutableCollection.findFirst(specification);
+  }
+
+  @override
+  Future<T> findOne(Specification specification) {
+    return _immutableCollection.findOne(specification);
+  }
+
+  @override
+  Future<void> removeAll(Iterable<T> entities) {
+    return _collection.removeAll(entities);
+  }
+
+  @override
+  Future<void> removeOne(T entity) {
+    return _collection.removeOne(entity);
+  }
+
+  @override
+  Future<void> update(T entity) {
+    return _collection.update(entity);
   }
 }

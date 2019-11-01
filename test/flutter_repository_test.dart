@@ -195,7 +195,8 @@ class PrivateCollectionTest extends SimpleCollectionTest {
     ownerSpecification = Specification();
     ownerSpecification.equals('userId', 12345);
     when(dataSource.find(ownerSpecification)).thenAnswer((_) => Future.value(persistentObjects));
-    objects = PrivateCollection(ownerSpecification, dataSource, servant);
+    final allObjects = SimpleCollection(dataSource, servant);
+    objects = PrivateCollection(ownerSpecification, allObjects);
   }
 
   @override
