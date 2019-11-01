@@ -1,6 +1,6 @@
 import 'package:collection/collection.dart';
 
-const iterableComparator = IterableEquality();
+const _iterableComparator = IterableEquality();
 
 enum ConditionType {
   equals, lessThan, greaterThan, contains, containsIgnoreCase, and, or
@@ -67,7 +67,7 @@ class Condition {
               field == other.field &&
               value == other.value &&
               type == other.type &&
-              iterableComparator.equals(children, other.children);
+              _iterableComparator.equals(children, other.children);
 
   @override
   int get hashCode =>
@@ -212,7 +212,7 @@ class Specification {
       identical(this, other) ||
           other is Specification &&
               runtimeType == other.runtimeType &&
-              iterableComparator.equals(_conditions, other._conditions) &&
+              _iterableComparator.equals(_conditions, other._conditions) &&
               limit == other.limit &&
               offset == other.offset;
 

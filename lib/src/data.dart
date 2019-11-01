@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
 import 'specification.dart';
 
-const iterableEquality = IterableEquality();
+const _iterableEquality = IterableEquality();
 
 /// Representation of an entity that should be modified in the [DataSource].
 class EntityContext {
@@ -24,7 +24,7 @@ class EntityContext {
           other is EntityContext &&
               runtimeType == other.runtimeType &&
               entity == other.entity &&
-              iterableEquality.equals(idFieldNames, other.idFieldNames);
+              _iterableEquality.equals(idFieldNames, other.idFieldNames);
 
   @override
   int get hashCode =>
