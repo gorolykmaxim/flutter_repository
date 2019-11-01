@@ -257,20 +257,17 @@ class PrivateImmutableCollection<T> implements ImmutableCollection<T> {
 
   @override
   Future<List<T>> findAll(Specification specification) {
-    specification.insertConditionsFrom(_owner);
-    return _immutableCollection.findAll(specification);
+    return _immutableCollection.findAll(specification.insertConditionsFrom(_owner));
   }
 
   @override
   Future<T> findFirst(Specification specification) {
-    specification.insertConditionsFrom(_owner);
-    return _immutableCollection.findFirst(specification);
+    return _immutableCollection.findFirst(specification.insertConditionsFrom(_owner));
   }
 
   @override
   Future<T> findOne(Specification specification) {
-    specification.insertConditionsFrom(_owner);
-    return _immutableCollection.findOne(specification);
+    return _immutableCollection.findOne(specification.insertConditionsFrom(_owner));
   }
 }
 
@@ -299,8 +296,7 @@ class PrivateCollection<T> implements Collection<T> {
 
   @override
   Future<void> remove(Specification specification) {
-    specification.insertConditionsFrom(_owner);
-    return _collection.remove(specification);
+    return _collection.remove(specification.insertConditionsFrom(_owner));
   }
 
   @override

@@ -1,3 +1,6 @@
+## [1.0.0-dev.7]
+Made Specification immutable.
+
 ## [1.0.0-dev.6]
 Made PrivateImmutableCollection and PrivateCollection proxies to actual
 ImmutableCollection and Collection implementations.
