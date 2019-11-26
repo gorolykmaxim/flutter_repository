@@ -30,6 +30,11 @@ class EntityContext {
   int get hashCode =>
       entity.hashCode ^
       idFieldNames.hashCode;
+
+  @override
+  String toString() {
+    return 'EntityContext{entity: $entity, idFieldNames: $idFieldNames}';
+  }
 }
 
 /// Abstract read-only [DataSource] that only allows querying it's data.
