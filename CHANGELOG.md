@@ -1,3 +1,7 @@
+## [1.1.0]
+Add a mock class for SimpleCollection, so that library users
+would not have to make such mock themselves every time.
+
 ## [1.0.0]
 Initial release.
 
